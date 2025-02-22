@@ -1,7 +1,10 @@
 import mongoose from "mongoose";
 import { scrapeEvents } from "@/lib/scraper";
+import dotenv from "dotenv"
 
-const MONGODB_URI = "mongodb+srv://abhiwebdev20:CXZquCv9iUxMwJPY@scraper-cluster.bqf86.mongodb.net/"
+dotenv.config()
+
+const MONGODB_URI = process.env.MONGO_URI
 
 if (!MONGODB_URI) {
   throw new Error("⚠️ Please define the MONGODB_URI environment variable in .env");
@@ -15,7 +18,7 @@ async function connectDB() {
     }
 
     await scrapeEvents()
-    await mongoose.connect(MONGODB_URI, {
+    await mongoose.connect(MONGODB_URI as string, {
       dbName: "eventsDB", // Set your database name here
     });
 
