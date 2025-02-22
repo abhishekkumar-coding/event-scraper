@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function Navbar() {
   return (
-    <nav className="bg-gray-800 text-white sticky top-0 w-full">
+    <nav className="bg-gray-800 text-white sticky top-0 w-full z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
         <Link href="/" className="text-2xl font-bold">
           Sydney Eventscape
