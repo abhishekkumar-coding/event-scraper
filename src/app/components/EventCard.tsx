@@ -13,10 +13,14 @@ interface EventProps {
 
 export default function EventCard({ event }: EventProps) {
   const [email, setEmail] = useState<string>("");
+  const [loading, setLoading] = useState(false);
+
   console.log(email)
 
   const handleSubscribe = async () => {
     if (!email) return;
+    setLoading(true);
+
 
     try {
       const response = await fetch("/api/subscribe", {
@@ -26,12 +30,14 @@ export default function EventCard({ event }: EventProps) {
       });
 
       if (response.ok) {
-        window.location.href = event.link; // Redirect to event page
+        window.location.href = event.link;
       } else {
+        setLoading(false);
         console.error("Subscription failed");
       }
     } catch (error) {
       console.error("Error subscribing:", error);
+      setLoading(false);
     }
   };
 
@@ -57,7 +63,7 @@ export default function EventCard({ event }: EventProps) {
         onClick={handleSubscribe}
         className="mt-3 bg-blue-600 text-white px-4 py-2 rounded w-full"
       >
-        GET TICKETS
+        {loading ? "Loading..." : "GET TICKETS"}
       </button>
     </div>
   );
