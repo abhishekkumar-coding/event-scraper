@@ -55,5 +55,5 @@ interface EventData {
   link: string;
 }
 
-cron.schedule("*/1 * * * *", scrapeEvents);
+cron.schedule("0 0 * * *", scrapeEvents);
 export { scrapeEvents };
