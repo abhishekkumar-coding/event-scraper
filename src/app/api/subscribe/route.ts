@@ -1,38 +1,41 @@
 import { NextRequest, NextResponse } from "next/server";
-import { MongoServerError } from "mongodb"; // Import MongoDB error type
 import connectDB from "@/config/db";
 import Email from "@/model/email";
+import { sendEmail } from "@/lib/sendEmail";
 
 export async function POST(req: NextRequest) {
   await connectDB();
 
   try {
-    const { email } = await req.json();
+    const body = await req.json();
+    const { email, number } = body;
 
-    if (!email || !email.includes("@")) {
-      return NextResponse.json({ message: "Invalid email address" }, { status: 400 });
+    if (!email || !number) {
+      return NextResponse.json({ message: "Email and Number are required" }, { status: 400 });
     }
 
-    const subscription = await Email.create({ email });
-    return NextResponse.json(
-      { message: "Subscription successful", subscription },
-      { status: 201 }
+    const otp = Math.floor(100000 + Math.random() * 900000).toString(); // Generate 6-digit OTP
+
+    // Save OTP in DB
+    await Email.findOneAndUpdate(
+      { email }, // Find by email
+      { email, number, otp, isVerified: false, date: new Date() }, // Update fields
+      { upsert: true, new: true } // Create if not exists
     );
-  } catch (error: unknown) {
-    if (error instanceof MongoServerError && error.code === 11000) {
-      // ✅ TypeScript now recognizes 'error.code'
-      return NextResponse.json({ message: "Email already subscribed" }, { status: 409 });
-    }
 
-    if (error instanceof Error) {
-      return NextResponse.json(
-        { message: "Subscription failed", error: error.message },
-        { status: 500 }
-      );
-    }
+    // Send OTP via Email
+    await sendEmail(email, otp);
+
+    return NextResponse.json({ message: "OTP sent to email" }, { status: 200 });
+
+  } catch (error: unknown) {
+    console.error("Error sending OTP:", error);
 
     return NextResponse.json(
-      { message: "An unknown error occurred" },
+      { 
+        message: "Error sending OTP", 
+        error: error instanceof Error ? error.message : "Unknown error" 
+      },
       { status: 500 }
     );
   }
